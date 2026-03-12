@@ -19,13 +19,12 @@ export const register = async (req, res) => {
     name,
     email,
     password,
-    /*skills,
+    skills,
     experienceLevel,
     educationLevel,
     yearsOfExperience,
     preferredRoles,
     locationPreference
-    */
   } = req.body;
 
   try {
@@ -36,19 +35,18 @@ export const register = async (req, res) => {
     // Hash password
     const hashed = await bcrypt.hash(password, 10);
 
-    // Create new user
+    // Create new user with all fields
     const newUser = await User.create({
       name,
       email,
       password: hashed,
-      /*skills,
-      experienceLevel,
-      educationLevel,
-      yearsOfExperience,
-      preferredRoles,
-      locationPreference,
-      profileCompleted: Array.isArray(skills) && skills.length > 0
-      */
+      skills: skills || [],
+      experienceLevel: experienceLevel || "Entry",
+      educationLevel: educationLevel || "",
+      yearsOfExperience: yearsOfExperience || 0,
+      preferredRoles: preferredRoles || [],
+      locationPreference: locationPreference || "",
+      profileCompleted: skills && skills.length > 0
     });
 
     // Generate JWT token
@@ -66,14 +64,13 @@ export const register = async (req, res) => {
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
-        /*skills: newUser.skills,
+        skills: newUser.skills,
         experienceLevel: newUser.experienceLevel,
         educationLevel: newUser.educationLevel,
         yearsOfExperience: newUser.yearsOfExperience,
         preferredRoles: newUser.preferredRoles,
         locationPreference: newUser.locationPreference,
         profileCompleted: newUser.profileCompleted
-        */
       }
     });
   } catch (err) {
@@ -82,6 +79,7 @@ export const register = async (req, res) => {
   }
 };
 
+// Make sure login is exported
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -91,9 +89,88 @@ export const login = async (req, res) => {
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = jwt.sign({ id: user._id, role: user.role, email: user.email }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES });
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+    const token = jwt.sign(
+      { id: user._id, role: user.role, email: user.email }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: process.env.JWT_EXPIRES }
+    );
+    
+    res.json({ 
+      token, 
+      user: { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        role: user.role,
+        skills: user.skills,
+        experienceLevel: user.experienceLevel,
+        educationLevel: user.educationLevel,
+        yearsOfExperience: user.yearsOfExperience,
+        preferredRoles: user.preferredRoles,
+        locationPreference: user.locationPreference,
+        profileCompleted: user.profileCompleted
+      } 
+    });
   } catch (err) {
+    console.error("Login error:", err);
     res.status(500).json({ message: err.message });
+  }
+};
+
+// Add updateProfile export
+export const updateProfile = async (req, res) => {
+  try {
+    console.log("Update profile called with body:", req.body);
+    
+    const {
+      skills,
+      experienceLevel,
+      educationLevel,
+      preferredRoles,
+      yearsOfExperience,
+      locationPreference
+    } = req.body;
+
+    // Get user ID from the protect middleware
+    const userId = req.user.id;
+
+    // Update user in database
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        skills: skills || [],
+        experienceLevel: experienceLevel || "Entry",
+        educationLevel: educationLevel || "",
+        preferredRoles: preferredRoles || [],
+        yearsOfExperience: yearsOfExperience || 0,
+        locationPreference: locationPreference || "",
+        profileCompleted: true
+      },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      message: "Profile updated successfully",
+      user: {
+        id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        skills: updatedUser.skills,
+        experienceLevel: updatedUser.experienceLevel,
+        educationLevel: updatedUser.educationLevel,
+        yearsOfExperience: updatedUser.yearsOfExperience,
+        preferredRoles: updatedUser.preferredRoles,
+        locationPreference: updatedUser.locationPreference,
+        profileCompleted: updatedUser.profileCompleted
+      }
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(500).json({ message: error.message });
   }
 };
