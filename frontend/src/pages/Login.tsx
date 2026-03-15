@@ -3,68 +3,113 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import axios from "../api/axios";
 import type { AxiosError } from "axios";
+import "./AppStyles.css"; // Use the unified styles
 
 const Login: React.FC = () => {
-  const { setToken } = useContext(AuthContext)!;
+  const { setToken, setUser } = useContext(AuthContext)!;
   const navigate = useNavigate();
 
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(""); // reset previous error
+    setError("");
+    setLoading(true);
 
     try {
       const res = await axios.post("/auth/login", { email, password });
 
-      // save token in context & localStorage
-      setToken(res.data.token);
+      console.log("Login response:", res.data);
 
-      // redirect to profile page
-      navigate("/profile");
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      setToken(res.data.token);
+      setUser(res.data.user);
+
+      if (res.data.user.role === "ADMIN") {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err: unknown) {
-      // properly type the error
       const error = err as AxiosError<{ message: string }>;
       setError(error.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleLogin}
-        className="bg-white p-6 rounded shadow-md w-80"
-      >
-        <h2 className="text-2xl font-bold mb-4">Login</h2>
-        {error && <p className="text-red-500 mb-2">{error}</p>}
+    <div className="auth-body">
+      <div className="auth-card">
+        <h1 className="auth-title">Welcome Back</h1>
+        <p className="auth-subtitle">Sign in to your account</p>
 
-        <input
-          type="email"
-          placeholder="Email"
-          className="border p-2 w-full mb-2"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        {error && (
+          <div className="auth-error">
+            <span className="auth-error-text">{error}</span>
+          </div>
+        )}
 
-        <input
-          type="password"
-          placeholder="Password"
-          className="border p-2 w-full mb-4"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <form onSubmit={handleLogin} className="auth-form">
+          <div className="form-group">
+            <label htmlFor="email" className="form-label">Email Address</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              className="form-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={loading}
+            />
+          </div>
 
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded w-full hover:bg-blue-700 transition"
-        >
-          Login
-        </button>
-      </form>
+          <div className="form-group">
+            <label htmlFor="password" className="form-label">Password</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              className="form-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={loading}
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="auth-button"
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="button-content">
+                <span className="spinner"></span>
+                Signing in...
+              </span>
+            ) : (
+              'Sign In'
+            )}
+          </button>
+
+          <p className="auth-footer">
+            Don't have an account?{' '}
+            <button
+              onClick={() => navigate("/signup")}
+              className="auth-link"
+            >
+              Sign up
+            </button>
+          </p>
+        </form>
+      </div>
     </div>
   );
 };

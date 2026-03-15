@@ -1,19 +1,21 @@
-import { useContext, type ReactNode, } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useContext } from "react";
 import { Navigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 interface ProtectedRouteProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const auth = useContext(AuthContext);
-  if (!auth) throw new Error("AuthContext missing. Wrap your app in <AuthProvider>");
+  const { user, token, loading } = useContext(AuthContext)!;
 
-  const { user, loading } = auth;
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
 
-  if (loading) return <p>Loading...</p>; // show spinner if needed
-  if (!user) return <Navigate to="/" replace />; // redirect if not authenticated
+  if (!token || !user) {
+    return <Navigate to="/login" replace />;
+  }
 
   return <>{children}</>;
 };

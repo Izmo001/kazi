@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from "react";
-import type { ReactNode } from "react";import axios from "../api/axios"; // your axios instance with baseURL
+import type { ReactNode } from "react";
+import axios from "../api/axios";
 import { AxiosError } from "axios";
 
 interface User {
@@ -7,6 +8,14 @@ interface User {
   name: string;
   email: string;
   role: "USER" | "STAFF" | "ADMIN";
+  skills?: string[];
+  experienceLevel?: string;
+  educationLevel?: string;
+  yearsOfExperience?: number;
+  preferredRoles?: string[];
+  locationPreference?: string;
+  profileCompleted?: boolean;
+  cvUrl?: string;
 }
 
 interface AuthContextType {
@@ -22,12 +31,19 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string>(localStorage.getItem("token") || "");
+  // Initialize from localStorage immediately
+  const [user, setUser] = useState<User | null>(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+  
+  const [token, setToken] = useState<string>(() => {
+    return localStorage.getItem("token") || "";
+  });
+  
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,16 +56,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       try {
         const res = await axios.get("/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-          withCredentials: true
+          headers: { Authorization: `Bearer ${token}` }
         });
-        setUser(res.data);
+        
+        const userData = {
+          ...res.data,
+          skills: res.data.skills || []
+        };
+        
+        setUser(userData);
+        localStorage.setItem("user", JSON.stringify(userData));
+        
       } catch (err) {
         const error = err as AxiosError;
         console.error("Auth fetch failed:", error.response?.data || error.message);
         setUser(null);
-        setToken(""); // clear invalid token
+        setToken("");
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
       } finally {
         setLoading(false);
       }
@@ -62,6 +86,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setToken("");
     setUser(null);
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
   };
 
   return (

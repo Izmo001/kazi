@@ -1,4 +1,4 @@
-import Application from "../models/application.model.js";
+import Application from "../models/Application.js";
 
 /**
  * Create Application

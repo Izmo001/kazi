@@ -5,22 +5,20 @@ import path from "path";
 
 import authRoutes from "./routes/auth.routes.js";
 import jobRoutes from "./routes/job.routes.js";
-import applicationRoutes from "./routes/application.routes.js";
+import applicationRoutes from "./routes/application.routes.js"; // ✅ Make sure this line exists
 import downloadRoutes from "./routes/download.routes.js";
 import paymentRoutes from "./routes/payment.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 const app = express();
 
-// ✅ CORS configuration for frontend
+// CORS configuration
 app.use(cors({
-  origin: "http://localhost:5173", // your frontend URL
-  credentials: true,               // allow cookies / Authorization headers
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Explicitly allow methods
-  allowedHeaders: ["Content-Type", "Authorization", "Accept"], // Allowed headers
+  origin: "http://localhost:5173",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "Accept"],
 }));
-
-// Handle preflight requests - this is handled by cors middleware above
-// No need for app.options('*', cors()) - it's already included
 
 app.use(express.json());
 app.use(morgan("dev"));
@@ -29,19 +27,21 @@ app.use("/uploads", express.static(path.join(path.resolve(), "uploads")));
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
-app.use("/api/applications", applicationRoutes);
+app.use("/api/applications", applicationRoutes); // ✅ This line must be present
 app.use("/api/download", downloadRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Simple root
 app.get("/", (req, res) => res.json({ ok: true, service: "job-assist-backend" }));
 
-// 404 handler for undefined routes
+// 404 handler
 app.use((req, res) => {
+  console.log(`❌ 404 - Route not found: ${req.method} ${req.url}`);
   res.status(404).json({ message: "Route not found" });
 });
 
-// Error handling middleware
+// Error handler
 app.use((err, req, res, next) => {
   console.error("Server error:", err);
   res.status(500).json({ message: "Internal server error" });
