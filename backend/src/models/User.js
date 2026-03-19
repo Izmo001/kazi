@@ -55,6 +55,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: ""
     },
+    subscription: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subscription"
+    },
     subscriptionStatus: {
       type: Boolean,
       default: false

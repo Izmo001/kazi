@@ -15,9 +15,8 @@ const Navbar = () => {
 
   return (
     <nav style={{
-      backgroundColor: 'white',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-      borderBottom: '1px solid #e5e7eb',
+      background: 'linear-gradient(135deg, #5B4B8A 0%, #1E88C5 100%)',
+      boxShadow: '0 4px 20px rgba(91, 75, 138, 0.3)',
       position: 'sticky',
       top: 0,
       zIndex: 50
@@ -31,75 +30,41 @@ const Navbar = () => {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          height: '64px'
+          height: '70px'
         }}>
           {/* Logo */}
-          <Link 
-            to="/" 
-            style={{
-              fontSize: '1.25rem',
-              fontWeight: 'bold',
-              color: '#1f2937',
-              textDecoration: 'none'
-            }}
-          >
-            Job<span style={{ color: '#4f46e5' }}>Portal</span>
+          <Link to="/" style={{
+            fontSize: '1.5rem',
+            fontWeight: 'bold',
+            textDecoration: 'none',
+            color: 'white',
+            textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
+          }}>
+            Job<span style={{ fontWeight: '300' }}>Portal</span>
           </Link>
 
-          {/* Desktop Navigation - HORIZONTAL */}
+          {/* Desktop Navigation */}
           {token && (
             <div style={{
               display: 'flex',
               gap: '2rem',
               alignItems: 'center'
             }}>
-              <Link 
-                to="/dashboard" 
-                style={{
-                  color: '#4b5563',
-                  textDecoration: 'none',
-                  fontWeight: '500',
-                  fontSize: '0.95rem'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.color = '#4f46e5'}
-                onMouseLeave={(e) => e.currentTarget.style.color = '#4b5563'}
-              >
-                Dashboard
-              </Link>
-              
-              <Link 
-                to="/profile" 
-                style={{
-                  color: '#4f46e5',
-                  textDecoration: 'none',
-                  fontWeight: '500',
-                  fontSize: '0.95rem',
-                  borderBottom: '2px solid #4f46e5',
-                  paddingBottom: '2px'
-                }}
-              >
-                Profile
-              </Link>
-              
+              <Link to="/dashboard" style={navLinkStyle}>Dashboard</Link>
+              <Link to="/profile" style={navLinkStyle}>Profile</Link>
+              <Link to="/subscription" style={navLinkStyle}>Subscription</Link>
               {user?.role === "ADMIN" && (
-                <Link 
-                  to="/admin" 
-                  style={{
-                    color: '#4b5563',
-                    textDecoration: 'none',
-                    fontWeight: '500',
-                    fontSize: '0.95rem'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = '#4f46e5'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = '#4b5563'}
-                >
-                  Admin
-                </Link>
+                <Link to="/admin" style={{
+                  ...navLinkStyle,
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '30px'
+                }}>Admin</Link>
               )}
             </div>
           )}
 
-          {/* Desktop Right Section */}
+          {/* Right Section */}
           <div style={{
             display: 'flex',
             gap: '1.5rem',
@@ -111,65 +76,58 @@ const Navbar = () => {
                 gap: '1.5rem',
                 alignItems: 'center'
               }}>
-                <span style={{
-                  fontSize: '0.9rem',
-                  fontWeight: '500',
-                  color: '#4b5563'
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  backgroundColor: 'rgba(255,255,255,0.15)',
+                  padding: '0.25rem 1rem',
+                  borderRadius: '30px'
                 }}>
-                  {user?.name?.split(' ')[0] || 'User'}
-                </span>
-                
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    background: 'white',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#5B4B8A',
+                    fontWeight: 'bold',
+                    fontSize: '0.9rem',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                  }}>
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <span style={{ color: 'white', fontWeight: '500' }}>
+                    {user?.name?.split(' ')[0]}
+                  </span>
+                </div>
                 <button
                   onClick={handleLogout}
                   style={{
-                    fontSize: '0.9rem',
-                    color: '#6b7280',
+                    ...navLinkStyle,
+                    color: 'white',
+                    cursor: 'pointer',
                     background: 'none',
                     border: 'none',
-                    cursor: 'pointer',
-                    fontWeight: '500'
+                    opacity: 0.9
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = '#dc2626'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = '#6b7280'}
                 >
                   Logout
                 </button>
               </div>
             ) : (
-              <div style={{
-                display: 'flex',
-                gap: '1.5rem',
-                alignItems: 'center'
-              }}>
-                <Link 
-                  to="/login" 
-                  style={{
-                    color: '#4b5563',
-                    textDecoration: 'none',
-                    fontWeight: '500',
-                    fontSize: '0.95rem'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = '#4f46e5'}
-                  onMouseLeave={(e) => e.currentTarget.style.color = '#4b5563'}
-                >
-                  Login
-                </Link>
-                <Link 
-                  to="/signup" 
-                  style={{
-                    backgroundColor: '#4f46e5',
-                    color: 'white',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '0.5rem',
-                    textDecoration: 'none',
-                    fontWeight: '500',
-                    fontSize: '0.95rem'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4338ca'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#4f46e5'}
-                >
-                  Sign Up
-                </Link>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <Link to="/login" style={navLinkStyle}>Login</Link>
+                <Link to="/signup" style={{
+                  ...navLinkStyle,
+                  backgroundColor: 'white',
+                  color: '#5B4B8A',
+                  padding: '0.5rem 1.25rem',
+                  borderRadius: '30px',
+                  fontWeight: '600'
+                }}>Sign Up</Link>
               </div>
             )}
           </div>
@@ -181,9 +139,9 @@ const Navbar = () => {
               display: 'none',
               background: 'none',
               border: 'none',
-              cursor: 'pointer',
               fontSize: '1.5rem',
-              color: '#4b5563'
+              cursor: 'pointer',
+              color: 'white'
             }}
             className="md:hidden"
           >
@@ -194,112 +152,28 @@ const Navbar = () => {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div style={{
-            display: 'block',
-            borderTop: '1px solid #e5e7eb',
-            padding: '1rem 0'
+            display: 'none',
+            background: 'rgba(91, 75, 138, 0.95)',
+            borderRadius: '12px',
+            padding: '1rem',
+            marginBottom: '1rem'
           }} className="md:hidden">
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.75rem'
-            }}>
-              {token ? (
-                <>
-                  <div style={{ padding: '0.5rem 0.75rem' }}>
-                    <p style={{ fontWeight: '500', color: '#1f2937' }}>{user?.name || 'User'}</p>
-                    <p style={{ fontSize: '0.75rem', color: '#6b7280' }}>{user?.email || ''}</p>
-                  </div>
-
-                  <Link 
-                    to="/dashboard" 
-                    style={{
-                      padding: '0.5rem 0.75rem',
-                      color: '#4b5563',
-                      textDecoration: 'none',
-                      borderRadius: '0.5rem'
-                    }}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
-                  <Link 
-                    to="/profile" 
-                    style={{
-                      padding: '0.5rem 0.75rem',
-                      color: '#4f46e5',
-                      backgroundColor: '#eef2ff',
-                      textDecoration: 'none',
-                      borderRadius: '0.5rem',
-                      fontWeight: '500'
-                    }}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Profile
-                  </Link>
-                  {user?.role === "ADMIN" && (
-                    <Link 
-                      to="/admin" 
-                      style={{
-                        padding: '0.5rem 0.75rem',
-                        color: '#4b5563',
-                        textDecoration: 'none',
-                        borderRadius: '0.5rem'
-                      }}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Admin Panel
-                    </Link>
-                  )}
-                  <button
-                    onClick={handleLogout}
-                    style={{
-                      padding: '0.5rem 0.75rem',
-                      textAlign: 'left',
-                      background: 'none',
-                      border: 'none',
-                      color: '#6b7280',
-                      cursor: 'pointer',
-                      borderRadius: '0.5rem'
-                    }}
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link 
-                    to="/login" 
-                    style={{
-                      padding: '0.5rem 0.75rem',
-                      color: '#4b5563',
-                      textDecoration: 'none',
-                      borderRadius: '0.5rem'
-                    }}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Login
-                  </Link>
-                  <Link 
-                    to="/signup" 
-                    style={{
-                      padding: '0.5rem 0.75rem',
-                      backgroundColor: '#4f46e5',
-                      color: 'white',
-                      textDecoration: 'none',
-                      borderRadius: '0.5rem'
-                    }}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
-            </div>
+            {/* Mobile menu items */}
           </div>
         )}
       </div>
     </nav>
   );
+};
+
+const navLinkStyle = {
+  color: 'white',
+  textDecoration: 'none',
+  fontWeight: '500',
+  fontSize: '1rem',
+  transition: 'opacity 0.2s',
+  padding: '0.5rem 0',
+  opacity: 0.9
 };
 
 export default Navbar;

@@ -1,136 +1,186 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "../api/axios";
 import type { AxiosError } from "axios";
-import "./AppStyles.css"; // ✅ Use single CSS file
+import "./AppStyles.css";
 
 const Signup: React.FC = () => {
   const navigate = useNavigate();
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
-  const [loading, setLoading] = useState(false);
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
-  const validateForm = () => {
-    const newErrors: {[key: string]: string} = {};
-
-    if (!name.trim()) newErrors.name = "Name is required";
-    else if (name.trim().length < 2) newErrors.name = "Name must be at least 2 characters";
-
-    if (!email) newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is invalid";
-
-    if (!password) newErrors.password = "Password is required";
-    else if (password.length < 6) newErrors.password = "Password must be at least 6 characters";
-
-    if (!confirmPassword) newErrors.confirmPassword = "Please confirm your password";
-    else if (confirmPassword !== password) newErrors.confirmPassword = "Passwords do not match";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
     
-    if (!validateForm()) return;
+    // Basic validation
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
 
     setLoading(true);
 
     try {
-      await axios.post("/auth/register", { name, email, password });
+      const res = await axios.post("/auth/register", {
+        name,
+        email,
+        password,
+      });
+
+      console.log("Signup response:", res.data);
+      
+      // Show success message
       alert("Account created successfully! Please login.");
       navigate("/login");
-    } catch (err: any) {
-      setErrors({ 
-        form: err.response?.data?.message || "Signup failed. Please try again." 
-      });
+
+    } catch (err: unknown) {
+      const error = err as AxiosError<{ message: string }>;
+      setError(error.response?.data?.message || "Signup failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="signup-body">
-      <div className="signup-card">
-        <h1 className="signup-title">Create Account</h1>
-        <p className="signup-subtitle">Join our community today</p>
+    <div className="auth-body">
+      <div className="auth-card">
+        <h1 className="auth-title">Create Account</h1>
+        <p className="auth-subtitle">Join JobPortal today</p>
 
-        {errors.form && (
-          <div className="signup-error">
-            <span>{errors.form}</span>
+        {error && (
+          <div className="auth-error">
+            <span className="auth-error-text">{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="signup-form">
+        <form onSubmit={handleSignup} className="auth-form">
+          {/* Name Field */}
           <div className="form-group">
             <label htmlFor="name" className="form-label">Full Name</label>
             <input
               id="name"
               type="text"
               placeholder="Enter your full name"
-              className={`form-input ${errors.name ? 'input-error' : ''}`}
+              className="form-input"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              required
               disabled={loading}
             />
-            {errors.name && <span className="field-error">{errors.name}</span>}
           </div>
 
+          {/* Email Field */}
           <div className="form-group">
             <label htmlFor="email" className="form-label">Email Address</label>
             <input
               id="email"
               type="email"
               placeholder="Enter your email"
-              className={`form-input ${errors.email ? 'input-error' : ''}`}
+              className="form-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
               disabled={loading}
             />
-            {errors.email && <span className="field-error">{errors.email}</span>}
           </div>
 
+          {/* Password Field */}
           <div className="form-group">
             <label htmlFor="password" className="form-label">Password</label>
-            <input
-              id="password"
-              type="password"
-              placeholder="Create a password"
-              className={`form-input ${errors.password ? 'input-error' : ''}`}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-            />
-            {errors.password ? (
-              <span className="field-error">{errors.password}</span>
-            ) : (
-              <span className="field-hint">Must be at least 6 characters</span>
-            )}
+            <div style={{ position: 'relative' }}>
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Create a password"
+                className="form-input"
+                style={{ paddingRight: '40px' }}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#a0aec0',
+                  fontSize: '1.2rem'
+                }}
+              >
+                {showPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
           </div>
 
+          {/* Confirm Password Field */}
           <div className="form-group">
             <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
-            <input
-              id="confirmPassword"
-              type="password"
-              placeholder="Confirm your password"
-              className={`form-input ${errors.confirmPassword ? 'input-error' : ''}`}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              disabled={loading}
-            />
-            {errors.confirmPassword && (
-              <span className="field-error">{errors.confirmPassword}</span>
-            )}
+            <div style={{ position: 'relative' }}>
+              <input
+                id="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm your password"
+                className="form-input"
+                style={{ paddingRight: '40px' }}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                disabled={loading}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#a0aec0',
+                  fontSize: '1.2rem'
+                }}
+              >
+                {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
           </div>
 
+          {/* Password Hint */}
+          <p style={{ 
+            fontSize: '0.8rem', 
+            color: '#718096', 
+            marginTop: '-0.5rem', 
+            marginBottom: '1rem' 
+          }}>
+            Must be at least 6 characters
+          </p>
+
+          {/* Submit Button */}
           <button
             type="submit"
-            className="signup-button"
+            className="auth-button"
             disabled={loading}
           >
             {loading ? (
@@ -143,14 +193,12 @@ const Signup: React.FC = () => {
             )}
           </button>
 
-          <p className="signup-footer">
+          {/* Login Link */}
+          <p className="auth-footer">
             Already have an account?{' '}
-            <button
-              onClick={() => navigate("/login")}
-              className="signup-link"
-            >
+            <Link to="/login" className="auth-link">
               Sign in
-            </button>
+            </Link>
           </p>
         </form>
       </div>

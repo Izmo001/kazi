@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import "../pages/AppStyles.css"; // ✅ Correct path
+import "../pages/AppStyles.css";
+
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
@@ -9,6 +10,9 @@ const AdminLayout = () => {
     { path: "/admin", icon: "📊", label: "Dashboard" },
     { path: "/admin/jobs", icon: "💼", label: "Manage Jobs" },
     { path: "/admin/applications", icon: "📋", label: "Applications" },
+    { path: "/admin/analytics", icon: "📈", label: "Analytics" }, // ADD THIS LINE
+    { path: "/admin/users", icon: "👥", label: "Users" },
+    { path: "/admin/settings", icon: "⚙️", label: "Settings" },
   ];
 
   const isActive = (path: string) => {
