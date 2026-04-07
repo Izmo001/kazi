@@ -2,6 +2,7 @@ import Application from "../models/Application.js";
 import Job from "../models/Job.js";
 import Subscription from "../models/Subscription.js";
 import { initializeFreeTier } from "./subscription.controller.js";
+import emailService from "../services/email.service.js";
 
 /**
  * Create Application (Apply for a job)

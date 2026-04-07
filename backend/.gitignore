@@ -1,5 +1,22 @@
-node_modules
+# dependencies
+/node_modules
+
+# environment
 .env
-.DS_Store
-dist
-coverage
+.env.local
+.env.production
+
+# uploads
+/uploads/cvs/*
+!/uploads/cvs/.gitkeep
+
+# logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+
+# database
+*.db
