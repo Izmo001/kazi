@@ -1,5 +1,5 @@
 import express from "express";
-import Job from "../models/Job.js";
+import Job from "../models/job.js";
 import Application from "../models/Application.js";
 import User from "../models/User.js";
 import { protect, authorize } from "../middleware/authMiddleware.js";
